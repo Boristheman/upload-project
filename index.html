@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload PNG</title>
+</head>
+<body style="display:flex;justify-content:center;align-items:center;height:100vh;">
+
+<div id="drop" style="width:300px;height:200px;border:2px dashed black;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+  Drop PNG here
+</div>
+
+<script>
+const drop = document.getElementById("drop");
+
+// highlight on drag
+drop.ondragover = (e) => {
+  e.preventDefault();
+  drop.style.border = "2px dashed green";
+};
+
+// reset style
+drop.ondragleave = () => {
+  drop.style.border = "2px dashed black";
+};
+
+// handle drop
+drop.ondrop = (e) => {
+  e.preventDefault();
+  drop.style.border = "2px dashed black";
+
+  const file = e.dataTransfer.files[0];
+
+  // simple validation
+  if (!file || file.type !== "image/png") {
+    alert("Only PNG files allowed");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  fetch("/upload", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.text())
+  .then(data => {
+    alert("Upload successful");
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Upload failed");
+  });
+};
+</script>
+
+</body>
+</html>
