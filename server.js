@@ -1,12 +1,15 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 console.log("🔥 SERVER FILE LOADED");
 
 const app = express();
 
-// storage config (save as .png)
+// =======================
+// 📦 Storage config
+// =======================
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
@@ -19,36 +22,56 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
-// debug logging
+// =======================
+// 🧪 Debug logging
+// =======================
 app.use((req, res, next) => {
   console.log("➡️ Request:", req.method, req.url);
   next();
 });
 
-// serve HTML page
+// =======================
+// 🌍 Routes
+// =======================
+
+// root (required)
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+// upload page
 app.get("/upload-page", (req, res) => {
-  console.log("✅ Upload page route hit");
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // handle upload
 app.post("/upload", upload.single("file"), (req, res) => {
   console.log("📦 File received:", req.file);
-  res.send("Upload successful");
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+  res.send(fileUrl);
 });
 
-// (optional) view uploaded files
+// serve uploaded files
 app.use("/uploads", express.static("uploads"));
 
-// ROOT route (Render requires something here)
-app.get("/", (req, res) => {
-  res.send("Server is running");
+// list uploaded files (for Dell polling)
+app.get("/files", (req, res) => {
+  fs.readdir("uploads", (err, files) => {
+    if (err) {
+      console.log("❌ Error reading files:", err);
+      return res.json([]);
+    }
+    res.json(files);
+  });
 });
 
-// 🔥 IMPORTANT: dynamic port for Render
+// =======================
+// 🚀 Start server
+// =======================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
