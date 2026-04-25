@@ -6,7 +6,7 @@ console.log("🔥 SERVER FILE LOADED");
 
 const app = express();
 
-// configure storage (save as .png)
+// storage config (save as .png)
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
@@ -17,21 +17,18 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
-// log every request (debug)
+// debug logging
 app.use((req, res, next) => {
   console.log("➡️ Request:", req.method, req.url);
   next();
 });
 
-// root route
-app.get("/", (req, res) => {
-  console.log("✅ Root route hit");
-  res.send("Server is running");
-});
-
-// serve upload page
+// serve HTML page
 app.get("/upload-page", (req, res) => {
   console.log("✅ Upload page route hit");
   res.sendFile(path.join(__dirname, "index.html"));
@@ -43,7 +40,17 @@ app.post("/upload", upload.single("file"), (req, res) => {
   res.send("Upload successful");
 });
 
-// start server
-app.listen(3000, () => {
-  console.log("🚀 Server running on port 3000");
+// (optional) view uploaded files
+app.use("/uploads", express.static("uploads"));
+
+// ROOT route (Render requires something here)
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+// 🔥 IMPORTANT: dynamic port for Render
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port " + PORT);
 });

@@ -3,7 +3,7 @@
 <head>
   <title>Upload PNG</title>
 </head>
-<body style="display:flex;justify-content:center;align-items:center;height:100vh;">
+<body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
 
 <div id="drop" style="width:300px;height:200px;border:2px dashed black;display:flex;align-items:center;justify-content:center;cursor:pointer;">
   Drop PNG here
@@ -30,7 +30,6 @@ drop.ondrop = (e) => {
 
   const file = e.dataTransfer.files[0];
 
-  // simple validation
   if (!file || file.type !== "image/png") {
     alert("Only PNG files allowed");
     return;
@@ -44,13 +43,8 @@ drop.ondrop = (e) => {
     body: formData
   })
   .then(res => res.text())
-  .then(data => {
-    alert("Upload successful");
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Upload failed");
-  });
+  .then(() => alert("Upload successful"))
+  .catch(() => alert("Upload failed"));
 };
 </script>
 
