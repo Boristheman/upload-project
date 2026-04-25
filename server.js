@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
 // =======================
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 // 🌍 Routes
 // =======================
 
-// root (required)
+// root
 app.get("/", (req, res) => {
   res.send("Server is running");
 });
@@ -47,11 +47,24 @@ app.get("/upload-page", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// handle upload
+// handle upload + auto-delete
 app.post("/upload", upload.single("file"), (req, res) => {
   console.log("📦 File received:", req.file);
 
+  const filePath = req.file.path;
   const fileUrl = `/uploads/${req.file.filename}`;
+
+  // ⏱️ auto delete after 20 seconds
+  setTimeout(() => {
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.log("❌ Error deleting file:", err);
+      } else {
+        console.log("🗑️ Deleted:", filePath);
+      }
+    });
+  }, 20000);
+
   res.send(fileUrl);
 });
 
